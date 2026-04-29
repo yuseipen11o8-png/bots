@@ -16,7 +16,6 @@ def home():
     return "Lili, Nana, and Makaron are online!", 200
 
 def run():
-    # Renderは環境変数PORTを指定してくるのでそれを使う
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
@@ -31,7 +30,6 @@ TARGET_CHANNELS = [1478494656437424189, 1481902889109553223]
 BLACKLIST = [123456789012345678, 987654321098765432]
 IGNORE_WORDS = ["納豆", "ぺろ", "ペロ"]
 
-# 各BotのユーザーID（掛け合い判定用）
 LILI_USER_ID = 1480173387728031906
 NANA_USER_ID = 1480176910771294308
 MAKARON_USER_ID = 1481291325079949483
@@ -55,7 +53,6 @@ class LiliBot(commands.Bot):
         self.last_human_msg_times = {}
 
     async def setup_hook(self):
-        # スラッシュコマンド登録
         LILI_COMMANDS = {
             "hello": "こんにちは！", "good_night": "おやすみ～", "go_to_bed": "みんなそろそろ寝ようよ～",
             "good_morning": "おはよー！", "nice_picture": "かわいい！ありがとう！", "bye": "ばいばーい！",
@@ -64,16 +61,21 @@ class LiliBot(commands.Bot):
             "cry": "ぅうっ…ｸﾞｽｯｸﾞｽｯ…", "panic": "あわわわわ…", "worry": "大丈夫…？", 
             "shout": "あああーーーーーーーーーーーーーーーーーーーーーーーー！！！"
         }
+        
+        # エラー修正箇所：引数 r に型指定 : str を追加
         for name, resp in LILI_COMMANDS.items():
-            async def cb(interaction: discord.Interaction, r=resp):
-                if interaction.user.id in BLACKLIST:
-                    await interaction.response.send_message("……。", ephemeral=True)
-                    return
-                if is_in_target_area(interaction.channel):
-                    await interaction.response.send_message(r)
-                else:
-                    await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
-            self.tree.add_command(app_commands.Command(name=name, description="リリのアクション", callback=cb))
+            def make_callback(res_text: str):
+                async def cb(interaction: discord.Interaction):
+                    if interaction.user.id in BLACKLIST:
+                        await interaction.response.send_message("……。", ephemeral=True)
+                        return
+                    if is_in_target_area(interaction.channel):
+                        await interaction.response.send_message(res_text)
+                    else:
+                        await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+                return cb
+            
+            self.tree.add_command(app_commands.Command(name=name, description="リリのアクション", callback=make_callback(resp)))
         await self.tree.sync()
 
 bot_lili = LiliBot()
@@ -111,7 +113,6 @@ async def on_message(message):
         bot_lili.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
     content = message.content
-    # ナナとの掛け合い
     if message.author.id == NANA_USER_ID:
         responses = {
             "呼んだ？": "呼ばれてないよ…", "ふたりの": "ふたりのことが知りたいのなら～",
@@ -131,7 +132,6 @@ async def on_message(message):
             await asyncio.sleep(1.5 if "…リリ" in content else 1.0)
             await message.reply(responses[content])
     else:
-        # 一般反応
         if len(content) >= 100: await message.reply("長すぎるよ～")
         elif any(ki in content for ki in ['ロリなな', 'ろりなな','ななロリ','ななろり','ナナロリ','ナナろり','おねリリ','おねりり']):
             await message.reply('イノセンスなさそう')
@@ -169,16 +169,21 @@ class NanaBot(commands.Bot):
             "cry": "うぁわーん！", "panic": "どうしよう…", "worry": "どうしたの…？",
             "saikai": "どんな声か覚えてるかな～", "yakusoku": "遠い夏の～小さな記憶は～", "nana": "あなたになりたくて"
         }
+        
+        # エラー修正箇所：引数 r に型指定 : str を追加
         for name, resp in NANA_COMMANDS.items():
-            async def cb(interaction: discord.Interaction, r=resp):
-                if interaction.user.id in BLACKLIST:
-                    await interaction.response.send_message("……。", ephemeral=True)
-                    return
-                if is_in_target_area(interaction.channel):
-                    await interaction.response.send_message(r)
-                else:
-                    await interaction.response.send_message('ここでは使えないみたい。', ephemeral=True)
-            self.tree.add_command(app_commands.Command(name=name, description="ナナのアクション", callback=cb))
+            def make_callback(res_text: str):
+                async def cb(interaction: discord.Interaction):
+                    if interaction.user.id in BLACKLIST:
+                        await interaction.response.send_message("……。", ephemeral=True)
+                        return
+                    if is_in_target_area(interaction.channel):
+                        await interaction.response.send_message(res_text)
+                    else:
+                        await interaction.response.send_message('ここでは使えないみたい。', ephemeral=True)
+                return cb
+            
+            self.tree.add_command(app_commands.Command(name=name, description="ナナのアクション", callback=make_callback(resp)))
         await self.tree.sync()
 
 bot_nana = NanaBot()
@@ -242,7 +247,7 @@ async def on_message(message):
                 "彗星": "彗星になれたならいいのに…", "水星": "水星にもなりたいなぁ…", "翠星": "翠の星に乗って～",
                 "後悔": "徒然な後悔も言わないで～", "約束": "藍の鐘で", "信じ": "信じてなんてないかもね～",
                 "夢": "ふふふ～ふたりの～夢を夢を見せよう～", "帰": "帰ったほうがいいかもしれない気がしなくもないわ～",
-                "普通": "普通に笑って普通に泣いて生きて見たかった～", "空想": "空想でも信じればいつか叶うからと～言ってた～",
+                "普通": "普通に笑って普通に泣いて生きてみたかった～", "空想": "空想でも信じればいつか叶うからと～言ってた～",
                 "また": "またか～また現れたのか～", "怖": "お前なんて怖くないよ"
             }
             for k, v in simple.items():
@@ -260,7 +265,7 @@ intents_maka.message_content = True
 bot_maka = commands.Bot(command_prefix="マカロン", intents=intents_maka)
 
 ANNIVERSARIES = {
-    (6, 29): "再会のリリース日", (9, 14): "約束의リリース日", (4, 26): "秘密のリリース日",
+    (6, 29): "再会のリリース日", (9, 14): "約束のリリース日", (4, 26): "秘密のリリース日",
     (6, 18): "彗星になれたならのリリース日", (8, 26): "ふたりのアルバム＆誕生のリリース日",
     (10, 28): "深い青だったのリリース日", (4, 8): "ナナ＆リリ＆夜魔の一般公開記念日"
 }
@@ -307,18 +312,15 @@ async def サイコロ(ctx):
 # ==========================================
 async def start_all():
     keep_alive()
-    # 環境変数から各トークンを取得
     tokens = {
         "LILI": os.getenv('TOKEN_LILI'),
         "NANA": os.getenv('TOKEN_NANA'),
         "MAKARON": os.getenv('TOKEN_MAKARON')
     }
     
-    # 欠けているトークンがないかチェック
     for k, v in tokens.items():
         if not v: print(f"警告: {k} のトークンが設定されていません。")
 
-    # 3人を並列で起動
     await asyncio.gather(
         bot_lili.start(tokens["LILI"]),
         bot_nana.start(tokens["NANA"]),
