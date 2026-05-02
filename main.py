@@ -54,41 +54,63 @@ class LiliBot(commands.Bot):
 
     async def setup_hook(self):
         LILI_COMMANDS = {
-            "hello": "こんにちは！", 
-            "good_night": "おやすみ～",
-            "go_to_bed": "みんなそろそろ寝ようよ～",
-            "good_morning": "おはよー！",
-            "nice_picture": "かわいい！ありがとう！",
-            "bye": "ばいばーい！",
-            "turn_off": "うわぁ………",
-            "sad": "ひどいよー", 
-            "happy": "やったー！", 
-            "angry": "もう知らない！",
-            "feel_shy": "えへへ…",
-            "surprised": "キャー！",
-            "sorry": "ごめんなさい…", 
-            "smile": "うふふ～～",
-            "cry": "ぅうっ…",
-            "panic": "あわわわわ…", 
-            "worry": "大丈夫…？", 
-            "shout": "あああーーーーーーーーーーーーーーーーーーーーーーーー！！！"
-        }
-        
-        # エラー修正箇所：引数 r に型指定 : str を追加
-        for name, resp in LILI_COMMANDS.items():
-            def make_callback(res_text: str):
-                async def cb(interaction: discord.Interaction):
-                    if interaction.user.id in BLACKLIST:
-                        await interaction.response.send_message("……。", ephemeral=True)
-                        return
-                    if is_in_target_area(interaction.channel):
-                        await interaction.response.send_message(res_text)
-                    else:
-                        await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
-                return cb
+            "hello": ["こんにちは！", "リリが挨拶します"],
+            "good_night": ["おやすみ～", "リリが挨拶します"],
+            "go_to_bed": ["みんなそろそろ寝ようよ～", "リリが注意します"],
+            "good_morning": ["おはよー！", "リリが挨拶します"],
+            "nice_picture": ["かわいい！ありがとう！", "リリが絵を褒めます"],
+            "nice_food":["おいしそ～～","リリが食事を褒めます"],
+            "bye": ["ばいばーい！", "リリが挨拶します"],
+            "turn_off": ["うわぁ………", "リリがドン引きします"],
+            "sad": ["ひどいよー", "リリが悲しみます"],
+            "happy": ["やったー！", "リリが喜びます"],
+            "angry": ["もう知らない！", "リリが怒ります"],
+            "feel_shy": ["えへへ…", "リリが照れます"],
+            "surprised": ["キャー！", "リリが驚きます"],
+            "sorry": ["ごめんなさい…", "リリが謝ります"],
+            "smile": ["うふふ～～", "リリが笑います"],
+            "cry": ["うぅっ…", "リリが泣きます"],
+            "panic": ["あわわわわ…", "リリが慌てます"],
+            "worry": ["大丈夫…？", "リリが心配します"],
+            "shout": ["あああーーーーーーーーーーーーーーーーーーーーーーーー！！！", "リリが叫びます"],
+            "what":["なにそれ？","リリが疑問に思います"],
+            "hurry_up":["早くしてよ～","リリが急かします"],
+            "good_luck":["頑張ってね！","リリが応援します"],
+            "wait":["ちょっと待ってね…","リリが待って欲しそうにします"],
+            "hungry":["お腹へった～","リリがお腹を空かせます"],
+            "think":["えっと…","リリが考え込みます"],
+            "sleep":["すー…すー…","リリが寝ます"],
+            "silent":["…","リリが黙ります"],
+            "confused":["？？？？","リリが混乱します"],
+            "tired":["","リリが疲れます"],
+            "bored":["","リリがつまらなさそうにします"],
+            "":["",""],
+            "":["",""]
             
-            self.tree.add_command(app_commands.Command(name=name, description="リリのアクション", callback=make_callback(resp)))
-        await self.tree.sync()
+           
+}
+
+for cmd_name, data in LILI_COMMANDS.items():
+    response_text = data[0]
+    description_text = data[1]
+
+    async def create_callback(interaction: discord.Interaction, resp: str = response_text):
+        if interaction.user.id in BLACKLIST:
+            await interaction.response.send_message("……。", ephemeral=True)
+            return
+            
+        if is_in_target_area(interaction.channel):
+            await interaction.response.send_message(resp)
+        else:
+            await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+
+    bot.tree.add_command(
+        app_commands.Command(
+            name=cmd_name,
+            description=description_text,
+            callback=create_callback
+        )
+    )
 
 bot_lili = LiliBot()
 
@@ -158,7 +180,7 @@ async def on_message(message):
         if len(content) >= 100: await message.reply("長すぎるよ～")
         elif any(ki in content for ki in ['ロリなな', 'ろりなな','ななロリ','ななろり','ナナロリ','ナナろり','おねリリ','おねりり']):
             await message.reply('イノセンスなさそう')
-        else:
+        elif len(content) <= 40:
             simple = {
                 "スープ": "そのスープ温かいうちに飲むのがいいよ", 
                 "知りたい": "ふたりのことが知りたいのなら～",
@@ -178,7 +200,7 @@ async def on_message(message):
             }
             for k, v in simple.items():
                 if k in content: await message.reply(v); break
-            if any(w in content for w in ['藍', '青色','青い髪','桃色']): await message.reply('？ナナの話…？')
+            elif any(w in content for w in ['藍', '青色','青い髪','桃色']): await message.reply('？ナナの話…？')
             elif any(w in content for w in ['好き', 'スキ','ｽｷ','すき']): await message.reply('大好きだった～狂いそうなほど～')
 
 # ==================================================================================================================================================================
@@ -193,44 +215,62 @@ class NanaBot(commands.Bot):
 
     async def setup_hook(self):
         NANA_COMMANDS = {
-            "hello": "こんにちは～", 
-            "good_night": "みんなおやすみ～！",
-            "good_morning": "おはよう～",
-            "go_to_bed": "まだ寝てないの～？", 
-            "nice_picture": "すごいきれい…",
-            "bye": "さよなら～またね～",
-            "turn_off": "えぇ………", 
-            "sad": "やめてよ…！", 
-            "happy": "いえーい！", 
-            "angry": "ちょっと！",
-            "feel_shy": "てへへへ…",
-            "surprised": "うわっ！！", 
-            "sorry": "ごめんね…",
-            "smile": "ふふふ～",
-            "cry": "うぁわーん！", 
-            "panic": "どうしよう…", 
-            "worry": "どうしたの…？",
-            "saikai": "どんな声か覚えてるかな～",
-            "yakusoku": "遠い夏の～小さな記憶は～",
-            "nana": "あなたになりたくて"
-        }
-        
-        # エラー修正箇所：引数 r に型指定 : str を追加
-        for name, resp in NANA_COMMANDS.items():
-            def make_callback(res_text: str):
-                async def cb(interaction: discord.Interaction):
-                    if interaction.user.id in BLACKLIST:
-                        await interaction.response.send_message("……。", ephemeral=True)
-                        return
-                    if is_in_target_area(interaction.channel):
-                        await interaction.response.send_message(res_text)
-                    else:
-                        await interaction.response.send_message('ここでは使えないみたい。', ephemeral=True)
-                return cb
-            
-            self.tree.add_command(app_commands.Command(name=name, description="ナナのアクション", callback=make_callback(resp)))
-        await self.tree.sync()
+            "hello": ["こんにちは～", "ナナが挨拶します"],
+            "good_night": ["みんなおやすみ～！", "ナナが挨拶します"],
+            "good_morning": ["おはよう～", "ナナが挨拶します"],
+            "go_to_bed": ["まだ寝てないの～？", "ナナが注意します"],
+            "nice_picture": ["すごいきれい…", "ナナが絵を褒めます"],
+            "nice_food":["","ナナが食事を褒めます"],
+            "bye": ["さよなら～またね～", "ナナが挨拶します"],
+            "turn_off": ["えぇ………", "ナナがドン引きします"],
+            "sad": ["やめてよ…！", "ナナが悲しみます"],
+            "happy": ["いえーい！", "ナナが喜びます"],
+            "angry": ["ちょっと！", "ナナが怒ります"],
+            "feel_shy": ["てへへへ…", "ナナが照れます"],
+            "surprised": ["うわっ！！", "ナナが驚きます"],
+            "sorry": ["ごめんね…", "ナナが謝ります"],
+            "smile": ["ふふふ～", "ナナが笑います"],
+            "cry": ["うぁわーん！", "ナナが泣きます"],
+            "panic": ["どうしよう…", "ナナが慌てます"],
+            "worry": ["どうしたの…？", "ナナが心配します"],
+            "what":["なんだろう…？","ナナが疑問に思います"],
+            "hurry_up":["早く早く～","ナナが急かします"],
+            "good_luck":["頑張って！","ナナが応援します"],
+            "wait":["待ってて～","ナナが待って欲しそうにします"],
+            "hungry":["何か食べた～い","ナナがお腹を空かせます"],
+            "think":["う～ん","ナナが考え込みます"],
+            "":["",""],
+            "":["",""],
+            "":["",""],
+            "":["",""],
+            "":["",""],
+            "":["",""],
+            "suiseininaretanara":["日が沈んだ後の～","ナナとマカロンが歌います※長いので注意"],
+            "saikai":["どんな声か覚えてるかな～","リリとナナが歌います※長いので注意"],
+            "The_promise":["遠い夏の～小さな記憶は～","リリとナナが歌います※長いので注意"],
+            "nana":["あなたになりたくて～","ナナが歌います※長いので注意"]
+}
 
+for cmd_name, data in NANA_COMMANDS.items():
+    def make_callback(res_text):
+        async def create_callback(interaction: discord.Interaction):
+            if interaction.user.id in BLACKLIST:
+                await interaction.response.send_message("……。", ephemeral=True)
+                return
+
+            if is_in_target_area(interaction.channel):
+                await interaction.response.send_message(res_text)
+            else:
+                await interaction.response.send_message('ここでは使えないみたい。', ephemeral=True)
+        return create_callback
+
+    bot.tree.add_command(
+        app_commands.Command(
+            name=cmd_name,
+            description=data[1],
+            callback=make_callback(data[0])
+        )
+    )
 bot_nana = NanaBot()
 
 @tasks.loop(time=time(hour=17, minute=0, tzinfo=JST))
@@ -275,6 +315,8 @@ async def on_message(message):
             "ちょっとさみしいね…": "……リリがいるだけで嬉しいよ…",
             "大人になれば～": "全部忘れられると思うけど…",
             "約束を": "果たそう", 
+            "夢のように愛して～\n愛のように夢をみて～": "空想でも信じればいつか叶うからと～\n言ってた～～",
+            "普通に笑って普通に泣いて生きてみたかった～":"そんなこと今更叶わないから\n今日も眠りにつく～",
             "冒険しよう～": "ふ～たりは～",
             "リリはわたしの心の中に秘めた気持ちをを歌った曲\nザラザラなギターの音がわたしのナナに対する思いを表していて素敵！": "ナナもわたしの内面を歌った曲だよ！\n優しい感じでリリの細やかな描写があってナナのリリへの思いが伝わってくるね\n夜魔はリリに長いこと会えないでいた私の曲だよ\n明るい曲調とは裏腹にちょっと悲しい歌詞がいいよね～"
         }
@@ -369,9 +411,9 @@ async def サイコロ(ctx):
         await ctx.reply(f"ピポパ！ 合計：**{sum(rolls)}**\n🎲 {rolls}")
     except: await ctx.send("ピ？(エラーか時間切れだよ)")
 
-# ==========================================================================================================================================================
+# =============================================================================================================================================================
 # 統合実行セクション
-# ==========================================================================================================================================================
+# =============================================================================================================================================================
 async def start_all():
     keep_alive()
     tokens = {
