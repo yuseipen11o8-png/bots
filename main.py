@@ -196,7 +196,7 @@ async def on_message(message):
         if len(content) >= 100: await message.reply("長すぎるよ～")
         elif any(ki in content for ki in ['ロリなな', 'ろりなな','ななロリ','ななろり','ナナロリ','ナナろり','おねリリ','おねりり']):
             await message.reply('イノセンスなさそう')
-        elif len(content) <= 40:
+        elif len(content) <= 30:
             simple = {
                 "スープ": "そのスープ温かいうちに飲むのがいいよ", 
                 "知りたい": "ふたりのことが知りたいのなら～",
@@ -367,7 +367,7 @@ async def on_message(message):
             await asyncio.sleep(1.0); await message.reply("この曲たちはアルバムが公開されてから2年ほどたってから一般公開されたんだよね～")
     else:
         if len(content) >= 100: await message.reply(f"{len(content)}文字もあるよ～")
-        elif len(content) <= 40:
+        elif len(content) <= 30:
             simple = {
                 "彗星": "彗星になれたならいいのに…",
                 "水星": "水星にもなりたいなぁ…",
