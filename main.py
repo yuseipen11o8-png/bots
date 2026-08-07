@@ -201,14 +201,14 @@ async def on_message(message):
                 "馬鹿": "あの日大人のふりして逃げた馬鹿な僕を～～\n許して欲しかった～～"
             }
             for k, v in simple.items():
-    if k in content:
-        await message.reply(v)
-        break
-else:
-    if any(w in content for w in ['藍', '青色', '青い髪', '桃色']):
-        await message.reply('？ナナの話…？')
-    elif any(w in content for w in ['好き', 'スキ', 'ｽｷ', 'すき']):
-        await message.reply('大好きだった～狂いそうなほど～')
+                if k in content:
+                    await message.reply(v)
+                    break
+            else:
+                if any(w in content for w in ['藍', '青色', '青い髪', '桃色']):
+                    await message.reply('？ナナの話…？')
+                elif any(w in content for w in ['好き', 'スキ', 'ｽｷ', 'すき']):
+                    await message.reply('大好きだった～狂いそうなほど～')
 
 # ==================================================================================================================================================================
 # 2. ナナ (Nana) の構成
