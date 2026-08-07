@@ -1,3 +1,4 @@
+print("MAIN.PY START")
 import discord
 import os
 import asyncio
@@ -470,7 +471,10 @@ async def start_bot_safe(bot, token, name):
     except Exception as e:
         print(f"[{name}] 起動エラー: {e}")
 
+
 async def start_all():
+    print("START_ALL 実行開始")
+
     keep_alive()
 
     tokens = {
