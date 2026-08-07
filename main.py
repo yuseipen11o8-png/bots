@@ -200,11 +200,16 @@ async def on_message(message):
                 "例えば": "例えば\n僕らが\n例えば\n僕らが\n例えば\n例えば\n例えば\n例えば", 
                 "馬鹿": "あの日大人のふりして逃げた馬鹿な僕を～～\n許して欲しかった～～"
             }
+            
+            found = False
+
             for k, v in simple.items():
                 if k in content:
                     await message.reply(v)
+                    found = True
                     break
-            else:
+
+            if not found:
                 if any(w in content for w in ['藍', '青色', '青い髪', '桃色']):
                     await message.reply('？ナナの話…？')
                 elif any(w in content for w in ['好き', 'スキ', 'ｽｷ', 'すき']):
