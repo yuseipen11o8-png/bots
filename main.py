@@ -88,31 +88,34 @@ class LiliBot(commands.Bot):
             "cold":["寒いよー…","リリが寒がります"],
             "hot":["あつい…","リリが暑がります"],
             "suspicious":["怪しい…","リリが疑います"]
-            
-           
-}
+        }
 
-for cmd_name, data in LILI_COMMANDS.items():
-    response_text = data[0]
-    description_text = data[1]
+        for cmd_name, data in LILI_COMMANDS.items():
+            response_text = data[0]
+            description_text = data[1]
 
-    async def create_callback(interaction: discord.Interaction, resp: str = response_text):
-        if interaction.user.id in BLACKLIST:
-            await interaction.response.send_message("……。", ephemeral=True)
-            return
-            
-        if is_in_target_area(interaction.channel):
-            await interaction.response.send_message(resp)
-        else:
-            await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+            async def create_callback(interaction: discord.Interaction, resp=response_text):
+                if interaction.user.id in BLACKLIST:
+                    await interaction.response.send_message("……。", ephemeral=True)
+                    return
 
-    bot.tree.add_command(
-        app_commands.Command(
-            name=cmd_name,
-            description=description_text,
-            callback=create_callback
-        )
-    )
+                if is_in_target_area(interaction.channel):
+                    await interaction.response.send_message(resp)
+                else:
+                    await interaction.response.send_message(
+                        "ここではお話しできないよ。",
+                        ephemeral=True
+                    )
+
+            self.tree.add_command(
+                app_commands.Command(
+                    name=cmd_name,
+                    description=description_text,
+                    callback=create_callback,
+                )
+            )
+
+        await self.tree.sync()
 
 bot_lili = LiliBot()
 
