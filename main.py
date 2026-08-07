@@ -462,19 +462,21 @@ async def サイコロ(ctx):
 # =============================================================================================================================================================
 async def start_all():
     keep_alive()
+
     tokens = {
-        "LILI": os.getenv('TOKEN_LILI'),
-        "NANA": os.getenv('TOKEN_NANA'),
-        "MAKARON": os.getenv('TOKEN_MAKARON')
+        "LILI": os.getenv("TOKEN_LILI"),
+        "NANA": os.getenv("TOKEN_NANA"),
+        "MAKARON": os.getenv("TOKEN_MAKARON"),
     }
-    
-    for k, v in tokens.items():
-        if not v: print(f"警告: {k} のトークンが設定されていません。")
+
+    print("TOKEN_LILI:", tokens["LILI"] is not None)
+    print("TOKEN_NANA:", tokens["NANA"] is not None)
+    print("TOKEN_MAKARON:", tokens["MAKARON"] is not None)
 
     await asyncio.gather(
         bot_lili.start(tokens["LILI"]),
         bot_nana.start(tokens["NANA"]),
-        bot_maka.start(tokens["MAKARON"])
+        bot_maka.start(tokens["MAKARON"]),
     )
 
 if __name__ == "__main__":
