@@ -37,8 +37,8 @@ class LiliBot(commands.Bot):
         super().__init__(command_prefix="リリ", intents=intents_lili)
         self.last_human_msg_times = {}
 
-async def setup_hook(self):
-    LILI_COMMANDS = {
+    async def setup_hook(self):
+        LILI_COMMANDS = {
             "hello": ["こんにちは！", "リリが挨拶します"],
             "good_night": ["おやすみ～", "リリが挨拶します"],
             "go_to_bed": ["そろそろ寝ようよ～", "リリが注意します"],
@@ -88,37 +88,37 @@ async def setup_hook(self):
             "cold":["寒いよー…","リリが寒がります"],
             "hot":["あつい…","リリが暑がります"],
             "suspicious":["怪しい…","リリが疑います"]
-    }
+        }
 
-    for cmd_name, data in LILI_COMMANDS.items():
-        response_text = data[0]
-        description_text = data[1]
+        for cmd_name, data in LILI_COMMANDS.items():
+            response_text = data[0]
+            description_text = data[1]
 
-        def make_callback(resp: str):
-            async def create_callback(interaction: discord.Interaction):
-                if interaction.user.id in BLACKLIST:
-                    await interaction.response.send_message("……。", ephemeral=True)
-                    return
+            def make_callback(resp: str):
+                async def create_callback(interaction: discord.Interaction):
+                    if interaction.user.id in BLACKLIST:
+                        await interaction.response.send_message("……。", ephemeral=True)
+                        return
 
-                if is_in_target_area(interaction.channel):
-                    await interaction.response.send_message(resp)
-                else:
-                    await interaction.response.send_message(
-                        "ここではお話しできないよ。",
-                        ephemeral=True
-                    )
+                    if is_in_target_area(interaction.channel):
+                        await interaction.response.send_message(resp)
+                    else:
+                        await interaction.response.send_message(
+                            "ここではお話しできないよ。",
+                            ephemeral=True
+                        )
 
-            return create_callback
+                return create_callback
 
-        self.tree.add_command(
-            app_commands.Command(
-                name=cmd_name,
-                description=description_text,
-                callback=make_callback(response_text),
+            self.tree.add_command(
+                app_commands.Command(
+                    name=cmd_name,
+                    description=description_text,
+                    callback=make_callback(response_text),
+                )
             )
-        )
 
-    await self.tree.sync()
+        await self.tree.sync()
 
 bot_lili = LiliBot()
 
@@ -281,7 +281,7 @@ class NanaBot(commands.Bot):
             "saikai":["どんな声か覚えてるかな～","リリとナナが歌います※長いので注意"],
             "The_promise":["遠い夏の～小さな記憶は～","リリとナナが歌います※長いので注意"],
             "nana":["あなたになりたくて～","ナナが歌います※長いので注意"]
-}
+        }
 
         for cmd_name, data in NANA_COMMANDS.items():
             response_text = data[0]
@@ -299,9 +299,9 @@ class NanaBot(commands.Bot):
                         await interaction.response.send_message(
                             "ここではお話しできないよ。",
                             ephemeral=True
-                    )
+                        )
 
-    return create_callback
+                return create_callback
 
             self.tree.add_command(
                 app_commands.Command(
