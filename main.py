@@ -280,26 +280,34 @@ class NanaBot(commands.Bot):
             "nana":["あなたになりたくて～","ナナが歌います※長いので注意"]
 }
 
-for cmd_name, data in NANA_COMMANDS.items():
-    def make_callback(res_text):
-        async def create_callback(interaction: discord.Interaction):
-            if interaction.user.id in BLACKLIST:
-                await interaction.response.send_message("……。", ephemeral=True)
-                return
+        for cmd_name, data in NANA_COMMANDS.items():
+            response_text = data[0]
+            description_text = data[1]
 
-            if is_in_target_area(interaction.channel):
-                await interaction.response.send_message(res_text)
-            else:
-                await interaction.response.send_message('ここでは使えないみたい。', ephemeral=True)
-        return create_callback
+            async def create_callback(interaction: discord.Interaction, resp=response_text):
+                if interaction.user.id in BLACKLIST:
+                    await interaction.response.send_message("……。", ephemeral=True)
+                    return
 
-    bot.tree.add_command(
-        app_commands.Command(
-            name=cmd_name,
-            description=data[1],
-            callback=make_callback(data[0])
-        )
-    )
+                if is_in_target_area(interaction.channel):
+                    await interaction.response.send_message(resp)
+                else:
+                    await interaction.response.send_message(
+                        "ここでは使えないみたい。",
+                        ephemeral=True
+                    )
+
+            self.tree.add_command(
+                app_commands.Command(
+                    name=cmd_name,
+                    description=description_text,
+                    callback=create_callback,
+                )
+            )
+
+        await self.tree.sync()
+
+
 bot_nana = NanaBot()
 
 @tasks.loop(time=time(hour=17, minute=0, tzinfo=JST))
