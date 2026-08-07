@@ -460,6 +460,16 @@ async def サイコロ(ctx):
 # =============================================================================================================================================================
 # 統合実行セクション
 # =============================================================================================================================================================
+
+async def start_bot_safe(bot, token, name):
+    if not token:
+        print(f"[{name}] トークンが設定されていません。")
+        return
+    try:
+        await bot.start(token)
+    except Exception as e:
+        print(f"[{name}] 起動エラー: {e}")
+
 async def start_all():
     keep_alive()
 
@@ -473,11 +483,14 @@ async def start_all():
     print("TOKEN_NANA:", tokens["NANA"] is not None)
     print("TOKEN_MAKARON:", tokens["MAKARON"] is not None)
 
-    await asyncio.gather(
-        bot_lili.start(tokens["LILI"]),
-        bot_nana.start(tokens["NANA"]),
-        bot_maka.start(tokens["MAKARON"]),
-    )
+    # 各Botを独立したタスクとして起動
+    tasks = [
+        asyncio.create_task(start_bot_safe(bot_lili, tokens["LILI"], "Lili")),
+        asyncio.create_task(start_bot_safe(bot_nana, tokens["NANA"], "Nana")),
+        asyncio.create_task(start_bot_safe(bot_maka, tokens["MAKARON"], "Makaron")),
+    ]
+
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 if __name__ == "__main__":
     try:
