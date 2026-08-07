@@ -94,24 +94,27 @@ class LiliBot(commands.Bot):
             response_text = data[0]
             description_text = data[1]
 
-            async def create_callback(interaction: discord.Interaction, resp=response_text):
-                if interaction.user.id in BLACKLIST:
-                    await interaction.response.send_message("……。", ephemeral=True)
-                    return
+            def make_callback(resp: str):
+                async def create_callback(interaction: discord.Interaction):
+                    if interaction.user.id in BLACKLIST:
+                        await interaction.response.send_message("……。", ephemeral=True)
+                        return
 
-                if is_in_target_area(interaction.channel):
-                    await interaction.response.send_message(resp)
-                else:
-                    await interaction.response.send_message(
-                        "ここではお話しできないよ。",
-                        ephemeral=True
-                    )
+                    if is_in_target_area(interaction.channel):
+                        await interaction.response.send_message(resp)
+                    else:
+                        await interaction.response.send_message(
+                            "ここではお話しできないよ。",
+                            ephemeral=True
+                        )
+
+    return create_callback
 
             self.tree.add_command(
                 app_commands.Command(
                     name=cmd_name,
                     description=description_text,
-                    callback=create_callback,
+                    callback=make_callback(response_text),
                 )
             )
 
@@ -284,24 +287,27 @@ class NanaBot(commands.Bot):
             response_text = data[0]
             description_text = data[1]
 
-            async def create_callback(interaction: discord.Interaction, resp=response_text):
-                if interaction.user.id in BLACKLIST:
-                    await interaction.response.send_message("……。", ephemeral=True)
-                    return
+            def make_callback(resp: str):
+                async def create_callback(interaction: discord.Interaction):
+                    if interaction.user.id in BLACKLIST:
+                        await interaction.response.send_message("……。", ephemeral=True)
+                        return
 
-                if is_in_target_area(interaction.channel):
-                    await interaction.response.send_message(resp)
-                else:
-                    await interaction.response.send_message(
-                        "ここでは使えないみたい。",
-                        ephemeral=True
+                    if is_in_target_area(interaction.channel):
+                        await interaction.response.send_message(resp)
+                    else:
+                        await interaction.response.send_message(
+                            "ここではお話しできないよ。",
+                            ephemeral=True
                     )
+
+    return create_callback
 
             self.tree.add_command(
                 app_commands.Command(
                     name=cmd_name,
                     description=description_text,
-                    callback=create_callback,
+                    callback=make_callback(response_text),
                 )
             )
 
