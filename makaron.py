@@ -30,41 +30,53 @@ ANNIVERSARIES = {
 # type: "choice"(選択式) or "text"(記述式)
 QUIZ_DATA = {
     1: [
-        {"type": "choice", "question": "黄金色は？",
-         "choices": {"A": "大阪", "B": "東京", "C": "京都", "D": "札幌"}, "answer": "B"},
-        {"type": "choice", "question": "1週間は何日？",
-         "choices": {"A": "5日", "B": "6日", "C": "7日", "D": "8日"}, "answer": "C"},
-        {"type": "text", "question": "黄金色は？",
+        {"type": "choice", "question": "ピコピコ(約束におけるリリとナナの年齢は？)",
+         "choices": {"A": "十歳", "B": "八歳", "C": "六歳", "D": "七歳"}, "answer": "D"},
+        {"type": "text", "question": "ﾋﾟﾋﾟｯ(リリのローマ字表記は？)",
+         "answer": ["lili"]},
+        {"type": "text", "question": "ピピー(黄金色は？)",
          "answer": ["リリ", "lili"]},
+        {"type": "text", "question": "ピコ！(リリの好きなものは？)",
+         "answer": ["おにぎり"]},
+        {"type": "text", "question": "ピコﾋﾟ(マカロンの好きなものは？)",
+         "answer": ["ハッピーエンド"]},
     ],
     2: [
-        {"type": "choice", "question": "1年で1番日が長い日を何と呼ぶ？",
-         "choices": {"A": "夏至", "B": "冬至", "C": "春分", "D": "秋分"}, "answer": "A"},
-        {"type": "text", "question": "日本で1番高い山は？",
-         "answer": ["富士山", "ふじさん"]},
-        {"type": "choice", "question": "水の化学式は？",
-         "choices": {"A": "CO2", "B": "O2", "C": "H2O", "D": "NaCl"}, "answer": "C"},
+        {"type": "choice", "question": "ピピー(リリースが一番遅いのは？)",
+         "choices": {"A": "再会", "B": "彗星になれたなら", "C": "秘密", "D": "約束"}, "answer": "B"},
+        {"type": "choice", "question": "ﾋﾟｺﾋﾟｰｺ(リリとナナ、初期デザインで身長が高いのは？)",
+         "choices": {"A": "リリ", "B": "ナナ"}, "answer": "A"},
+        {"type": "text", "question": "ピコピコ(アルバムには合計で何曲入ってる？(半角数字で))",
+         "answer": ["22"]},
     ],
     3: [
-        {"type": "text", "question": "太陽系で1番大きい惑星は？",
-         "answer": ["木星", "もくせい"]},
-        {"type": "choice", "question": "「情けは人の為ならず」の意味に近いのは？",
+        {"type": "text", "question": "ピピー(ふたりのの特設サイトのURLの末尾四文字は？)",
+         "answer": ["ftr/"]},
+        {"type": "choice", "question": "ピーー(再会のリリース日は？)"
          "choices": {
-             "A": "人に情けをかけるのは結局その人のためにならない",
-             "B": "人に情けをかけると巡り巡って自分に返ってくる",
-             "C": "情けをかける必要はない",
-             "D": "情けは無駄である"
+             "A": "2019/3/14",
+             "B": "2019/6/29",
+             "C": "2020/9/14",
+             "D": "2020/6/29"
          }, "answer": "B"},
-        {"type": "text", "question": "1ダースは何個？(数字で)",
-         "answer": ["12"]},
+        {"type": "text", "question": "ピピピッ(再会はトラック何番？(半角数字で))",
+         "answer": ["7"]},
+        {"type": "text", "question": "ピーピー(ナナ式記数法で12は？(漢数字で))",
+         "answer": ["七五"]},
     ],
     4: [
         {"type": "text", "question": "ピピピ(幻影APの約束のディスクを欲しがってるスピカの名前は？)",
-         "choices": {"A": "", "B": "やくそくのスピカ", "C": "じゅんぼくなスピカ", "D": "じゅんすいなスピカ"}, "answer": "C"},
+         "choices": {"A": "じゅんしんなスピカ", "B": "やくそくのスピカ", "C": "じゅんぼくなスピカ", "D": "じゅんすいなスピカ"}, "answer": "C"},
         {"type": "choice", "question": "ピピー(アートブックの再会のページ、右側は？)",
          "choices": {"A": "リリ", "B": "ナナ"}, "answer": "A"},
-        {"type": "text", "question": "アートブックの再会のページ、右側は？",
-         "answer": ["翠", "みどり"]},
+        {"type": "choice", "question": "ピッピッ(アートブックのリリとナナのページ、クロスフェードと一致しているのは？)",
+         "choices": {"A": "リリ", "B": "ナナ"}, "answer": "A"},
+        {"type": "choice", "question": "ピピピ(アートブックの誕生のページの左側には何が描かれている？)",
+         "choices": {"A": "グランドピアノ", "B": "彗星", "C": "鯨", "D": "なにも描かれていない"}, "answer": "D"},
+        {"type": "choice", "question": "ピー(はるまきごはん10周年イベントでのナナの担当は次のうちどれ？)",
+         "choices": {"A": "ラインスタンプ", "B": "デジタルカード", "C": "わたしたちの足跡", "D": "担当していない"}, "answer": "A"},
+        {"type": "text", "question": "ﾋﾟｺ！(約束のテーマは？)",
+         "answer": ["純粋"]},
     ],
     5: [
         {"type": "text", "question": "ﾋﾟｺﾋﾟｰｺ(アートブック11ページ目の絵のタイトルは？正式名称で答えてね)",
@@ -73,6 +85,11 @@ QUIZ_DATA = {
          "choices": {"A": "数年前のヒットソング", "B": "309へ集合", "C": "ダークマター", "D": "案外そんなフューチャー"}, "answer": "A"},
         {"type": "text", "question": "ピピピッ！(幻影APの再会のディスクを欲しがっているスピカの名前は？正式名称で答えてね)",
          "answer": ["めぐりあうスピカ"]},
+        {"type": "text", "question": "ピｺーﾝ！(アートブックの正式名称は？)",
+         "answer": ["スペシャル絵本アートブック「ふたりの」"]},
+        {"type": "text", "question": "ピピ(歌詞中に出てくる「！」の数は？)",
+         "answer": ["3", "３"]},
+     
     ],
 }
  
@@ -92,7 +109,7 @@ async def quiz(ctx, level: int = None):
         return
  
     if level is None:
-        await ctx.send("ピコピコ！(難易度は１～５のどれがいい？(例：3))")
+        await ctx.send("ピコピコ！(難易度は１～５のどれがいい？(例：マカロンサイコロ 3))")
         return
  
     if level not in QUIZ_DATA:
