@@ -120,6 +120,14 @@ async def bell_nana():
             await asyncio.sleep(1.0)
             await ch.send("タイムリミットの鐘が鳴る…")
 
+@tasks.loop(time=time(hour=3, minute=0, tzinfo=JST))
+async def bell_nana():
+    for cid in TARGET_CHANNELS:
+        ch = bot_nana.get_channel(cid)
+        if ch:
+            await asyncio.sleep(1.0)
+            await ch.send("届かぬ手紙を書いている…")
+
 
 @bot_nana.event
 async def on_ready():
