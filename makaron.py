@@ -65,7 +65,7 @@ QUIZ_DATA = {
          "answer": ["七五"]},
     ],
     4: [
-        {"type": "text", "question": "ピピピ(幻影APの約束のディスクを欲しがってるスピカの名前は？)",
+        {"type": "choice", "question": "ピピピ(幻影APの約束のディスクを欲しがってるスピカの名前は？)",
          "choices": {"A": "じゅんしんなスピカ", "B": "やくそくのスピカ", "C": "じゅんぼくなスピカ", "D": "じゅんすいなスピカ"}, "answer": "C"},
         {"type": "choice", "question": "ピピー(アートブックの再会のページ、右側は？)",
          "choices": {"A": "リリ", "B": "ナナ"}, "answer": "A"},
@@ -109,7 +109,7 @@ async def quiz(ctx, level: int = None):
         return
  
     if level is None:
-        await ctx.send("ピコピコ！(難易度は１～５のどれがいい？(例：マカロンサイコロ 3))")
+        await ctx.send("ピコピコ！(難易度は１～５のどれがいい？(例：マカロンクイズ 3))")
         return
  
     if level not in QUIZ_DATA:
@@ -159,7 +159,7 @@ async def quiz_score(ctx):
  
     stats = quiz_scores.get(ctx.author.id)
     if not stats or stats["total"] == 0:
-        await ctx.send("まだクイズに挑戦してないよー")
+        await ctx.send("ﾋﾞﾋﾞｰｯ(まだクイズに挑戦してないよー)")
         return
  
     rate = stats["correct"] / stats["total"] * 100
