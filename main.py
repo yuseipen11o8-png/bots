@@ -149,9 +149,13 @@ async def on_ready():
 @bot_lili.event
 async def on_message(message):
     if message.author.id == bot_lili.user.id or message.author.id in BLACKLIST: return
-    if any(word in message.content for word in IGNORE_WORDS): return
+    
+    # コマンド処理を優先して確実に通す
     await bot_lili.process_commands(message)
+
+    if any(word in message.content for word in IGNORE_WORDS): return
     if not is_in_target_area(message.channel): return
+
     if message.author.id != NANA_USER_ID:
         bot_lili.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
@@ -333,9 +337,12 @@ async def on_ready():
 @bot_nana.event
 async def on_message(message):
     if message.author.id == bot_nana.user.id or message.author.id in BLACKLIST: return
+    
+    # コマンド処理を優先して確実に通す
+    await bot_nana.process_commands(message)
+
     if any(word in message.content for word in IGNORE_WORDS): return
     if not is_in_target_area(message.channel): return
-    await bot_nana.process_commands(message)
 
     content = message.content
     if "たしかに" in content:
@@ -438,8 +445,11 @@ async def on_ready():
 @bot_maka.event
 async def on_message(message):
     if message.author.id == bot_maka.user.id or message.author.id in BLACKLIST: return
-    if any(word in message.content for word in IGNORE_WORDS): return
+    
+    # コマンド処理を優先して確実に通す
     await bot_maka.process_commands(message)
+
+    if any(word in message.content for word in IGNORE_WORDS): return
 
 @bot_maka.command()
 async def ping(ctx):
