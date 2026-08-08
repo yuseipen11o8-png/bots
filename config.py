@@ -26,3 +26,9 @@ IGNORE_WORDS = [
 LILI_USER_ID = 1480173387728031906
 NANA_USER_ID = 1480176910771294308
 MAKARON_USER_ID = 1481291325079949483
+
+def is_in_target_area(channel):
+    """このチャンネルがBotの反応対象かどうかを判定する"""
+    if channel is None:
+        return False
+    return channel.id in TARGET_CHANNELS
