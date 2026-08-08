@@ -3,16 +3,16 @@ import re
 from discord.ext import tasks, commands
 import discord
 from datetime import time, datetime
- 
+
 from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, is_in_target_area
- 
+
 # ===================================================================================================================================================================
 # マカロン (Makaron) の構成
 # ===================================================================================================================================================================
 intents_maka = discord.Intents.default()
 intents_maka.message_content = True
 bot_maka = commands.Bot(command_prefix="マカロン", intents=intents_maka)
- 
+
 ANNIVERSARIES = {
     (6, 29): "再会のリリース日",
     (9, 14): "約束のリリース日",
@@ -22,8 +22,8 @@ ANNIVERSARIES = {
     (10, 28): "深い青だったのリリース日",
     (4, 8): "ナナ＆リリ＆夜魔の一般公開記念日"
 }
- 
- 
+
+
 # ===================================================================================================================================================================
 # クイズ ミニゲーム
 # ===================================================================================================================================================================
@@ -89,83 +89,135 @@ QUIZ_DATA = {
          "answer": ["スペシャル絵本アートブック「ふたりの」"]},
         {"type": "text", "question": "ピピ(歌詞中に出てくる「！」の数は？)",
          "answer": ["3", "３"]},
-     
     ],
 }
- 
+
 # ユーザーごとの成績を記録(Bot起動中のみ保持、再起動でリセット)
 quiz_scores = {}
- 
- 
+
+
 def normalize_answer(text: str) -> str:
     text = text.strip()
     text = re.sub(r"\s+", "", text)
     return text
- 
- 
+
+
+class DifficultyView(discord.ui.View):
+    """マカロンクイズの難易度選択ボタン"""
+
+    def __init__(self, author: discord.Member):
+        super().__init__(timeout=30)
+        self.author = author
+        self.level = None
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.author.id:
+            await interaction.response.send_message("ﾋﾞｯ(これはあなたのクイズじゃないよー)", ephemeral=True)
+            return False
+        return True
+
+    async def _select(self, interaction: discord.Interaction, level: int):
+        self.level = level
+        for child in self.children:
+            child.disabled = True
+        await interaction.response.edit_message(content=f"ピコッ！難易度{level}だね！", view=self)
+        self.stop()
+
+    async def on_timeout(self):
+        for child in self.children:
+            child.disabled = True
+
+    @discord.ui.button(label="1", style=discord.ButtonStyle.secondary)
+    async def level1(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._select(interaction, 1)
+
+    @discord.ui.button(label="2", style=discord.ButtonStyle.secondary)
+    async def level2(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._select(interaction, 2)
+
+    @discord.ui.button(label="3", style=discord.ButtonStyle.secondary)
+    async def level3(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._select(interaction, 3)
+
+    @discord.ui.button(label="4", style=discord.ButtonStyle.secondary)
+    async def level4(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._select(interaction, 4)
+
+    @discord.ui.button(label="5", style=discord.ButtonStyle.secondary)
+    async def level5(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._select(interaction, 5)
+
+
 @bot_maka.command(name="クイズ")
 async def quiz(ctx, level: int = None):
     if not is_in_target_area(ctx.channel):
         return
- 
+
     if level is None:
-        await ctx.send("ピコピコ！(難易度は１～５のどれがいい？(例：マカロンクイズ 3))")
-        return
- 
+        view = DifficultyView(ctx.author)
+        prompt_msg = await ctx.send("ピコピコ！(難易度を選んでね(30秒以内))", view=view)
+        await view.wait()
+
+        if view.level is None:
+            await prompt_msg.edit(content="ピ…(時間切れだよー)", view=view)
+            return
+
+        level = view.level
+
     if level not in QUIZ_DATA:
-        await ctx.send("その難易度はないよー(１～５の数字で選んでね)")
+        await ctx.send("ピー！(その難易度はないよー(１～５の数字で選んでね))")
         return
- 
+
     q = random.choice(QUIZ_DATA[level])
- 
+
     if q["type"] == "choice":
         choices_text = "\n".join(f"{k}：{v}" for k, v in q["choices"].items())
         await ctx.send(f"【難易度{level}】{q['question']}\n{choices_text}\n(記号で答えてね／30秒以内)")
     else:
         await ctx.send(f"【難易度{level}】{q['question']}\n(30秒以内に答えてね)")
- 
+
     def check(m):
         return m.author == ctx.author and m.channel == ctx.channel
- 
+
     try:
         msg = await bot_maka.wait_for('message', timeout=30.0, check=check)
     except Exception:
-        await ctx.send("ピ…時間切れだよー")
+        await ctx.send("ピ…(時間切れだよー)")
         return
- 
+
     user_answer = normalize_answer(msg.content)
- 
+
     if q["type"] == "choice":
         is_correct = user_answer.upper() == q["answer"]
         correct_text = f"{q['answer']}：{q['choices'][q['answer']]}"
     else:
         is_correct = user_answer in [normalize_answer(a) for a in q["answer"]]
         correct_text = q["answer"][0]
- 
+
     stats = quiz_scores.setdefault(ctx.author.id, {"correct": 0, "total": 0})
     stats["total"] += 1
- 
+
     if is_correct:
         stats["correct"] += 1
         await ctx.reply(f"ピコーン！(正解！)【現在 {stats['correct']}/{stats['total']} 問正解】")
     else:
-        await ctx.reply(f"ﾋﾞﾋﾞｰｯ！(ザンネン…)【現在 {stats['correct']}/{stats['total']} 問正解】")
- 
- 
+        await ctx.reply(f"ﾋﾞﾋﾞｰｯ！(残念…)【現在 {stats['correct']}/{stats['total']} 問正解】")
+
+
 @bot_maka.command(name="クイズ成績")
 async def quiz_score(ctx):
     if not is_in_target_area(ctx.channel):
         return
- 
+
     stats = quiz_scores.get(ctx.author.id)
     if not stats or stats["total"] == 0:
-        await ctx.send("ﾋﾞﾋﾞｰｯ(まだクイズに挑戦してないよー)")
+        await ctx.send("ﾋﾞﾋﾞｯ(まだクイズに挑戦してないよー)")
         return
- 
+
     rate = stats["correct"] / stats["total"] * 100
-    await ctx.send(f"これまで {stats['total']} 問中 {stats['correct']} 問正解！(正解率 {rate:.0f}%)")
- 
- 
+    await ctx.send(f"ピコン！(これまで {stats['total']} 問中 {stats['correct']} 問正解！(正解率 {rate:.0f}%))")
+
+
 @tasks.loop(time=time(hour=0, minute=0, tzinfo=JST))
 async def check_anniversary_maka():
     now = datetime.now(JST)
@@ -175,15 +227,15 @@ async def check_anniversary_maka():
             ch = bot_maka.get_channel(cid)
             if ch:
                 await ch.send(f"ピコピコ！(今日は{ANNIVERSARIES[date_key]}なんだって！おめでとう！！)")
- 
- 
+
+
 @bot_maka.event
 async def on_ready():
     print(f"Makaron online: {bot_maka.user}")
     if not check_anniversary_maka.is_running():
         check_anniversary_maka.start()
- 
- 
+
+
 @bot_maka.event
 async def on_message(message):
     if message.author.id == bot_maka.user.id or message.author.id in BLACKLIST:
@@ -191,14 +243,14 @@ async def on_message(message):
     if any(word in message.content for word in IGNORE_WORDS):
         return
     await bot_maka.process_commands(message)
- 
- 
+
+
 @bot_maka.command()
 async def ping(ctx):
     if is_in_target_area(ctx.channel):
         await ctx.reply('ピポピポ')
- 
- 
+
+
 @bot_maka.command()
 async def サイコロ(ctx):
     if not is_in_target_area(ctx.channel):
@@ -221,4 +273,3 @@ async def サイコロ(ctx):
         await ctx.reply(f"ピポパ！ 合計：**{sum(rolls)}**\n🎲 {rolls}")
     except Exception:
         await ctx.send("ピ？(エラーか時間切れだよ)")
-
