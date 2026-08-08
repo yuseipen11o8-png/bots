@@ -167,14 +167,11 @@ async def on_message(message):
             "さんざめくこの世界にさよならを～": "手を繋いだまななら～",
             "二度と～": "来ない～",
             "翠の星に乗って～": "ふたりは一つの愛になる～",
-            "……だれもいないの？": "もう丸一日ふたりだけ…",
-            "ちょっとさみしいね…": "……リリがいるだけで嬉しいよ…",
             "大人になれば～": "全部忘れられると思うけど…",
             "約束を": "果たそう",
             "夢のように愛して～\n愛のように夢をみて～": "空想でも信じればいつか叶うからと～\n言ってた～～",
             "普通に笑って普通に泣いて生きてみたかった～": "そんなこと今更叶わないから\n今日も眠りにつく～",
             "冒険しよう～": "ふ～たりは～",
-            "リリはわたしの心の中に秘めた気持ちをを歌った曲\nザラザラなギターの音がわたしのナナに対する思いを表していて素敵！": "ナナもわたしの内面を歌った曲だよ！\n優しい感じでリリの細やかな描写があってナナのリリへの思いが伝わってくるね\n夜魔はリリに長いこと会えないでいた私の曲だよ\n明るい曲調とは裏腹にちょっと悲しい歌詞がいいよね～"
         }
         if content in responses:
             await asyncio.sleep(2.0 if "だれもいない" in content else 1.0)
@@ -183,13 +180,13 @@ async def on_message(message):
             await asyncio.sleep(1.0)
             await message.reply(f"たしかにね～\nもう{datetime.now(JST).year-2019}年も経つのかぁ…")
     elif message.author.id == MAKARON_USER_ID:
-        if "再会のリリース日" in content:
+        if "再会のリリース日なんだって！" in content:
             await asyncio.sleep(1.0)
             await message.reply("再会と言えばふたりのシリーズで一番最初の曲だよね～！")
-        elif "約束のリリース日" in content:
+        elif "約束のリリース日なんだって！" in content:
             await asyncio.sleep(1.0)
             await message.reply("約束を、果たしに来たんだね…！")
-        elif "一般公開記念日" in content:
+        elif "一般公開記念日なんだって！" in content:
             await asyncio.sleep(1.0)
             await message.reply("この曲たちはアルバムが公開されてから2年ほどたってから一般公開されたんだよね～")
     else:
