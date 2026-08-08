@@ -28,7 +28,16 @@ NANA_USER_ID = 1480176910771294308
 MAKARON_USER_ID = 1481291325079949483
 
 def is_in_target_area(channel):
-    """このチャンネルがBotの反応対象かどうかを判定する"""
+    """このチャンネル(スレッド内を含む)がBotの反応対象かどうかを判定する"""
     if channel is None:
         return False
-    return channel.id in TARGET_CHANNELS
+
+    if channel.id in TARGET_CHANNELS:
+        return True
+
+    # スレッド内の場合は親チャンネルのIDで判定する
+    parent_id = getattr(channel, "parent_id", None)
+    if parent_id is not None and parent_id in TARGET_CHANNELS:
+        return True
+
+    return False
