@@ -52,7 +52,7 @@ QUIZ_DATA = {
     3: [
         {"type": "text", "question": "ピピー(ふたりのの特設サイトのURLの末尾四文字は？)",
          "answer": ["ftr/"]},
-        {"type": "choice", "question": "ピーー(再会のリリース日は？)"
+        {"type": "choice", "question": "ピーー(再会のリリース日は？)",
          "choices": {
              "A": "2019/3/14",
              "B": "2019/6/29",
