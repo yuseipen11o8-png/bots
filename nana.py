@@ -121,7 +121,7 @@ async def bell_nana():
             await ch.send("タイムリミットの鐘が鳴る…")
 
 @tasks.loop(time=time(hour=3, minute=0, tzinfo=JST))
-async def bell_nana():
+async def yoma_nana():
     for cid in TARGET_CHANNELS:
         ch = bot_nana.get_channel(cid)
         if ch:
