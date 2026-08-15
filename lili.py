@@ -113,6 +113,15 @@ async def bell_lili():
             await ch.send("藍の鐘は午後五時に響く…")
 
 
+@tasks.loop(time=time(hour=3, minute=0, tzinfo=JST))
+async def yoma_lili():
+    for cid in TARGET_CHANNELS:
+        ch = bot_lili.get_channel(cid)
+        if ch:
+            await ch.send("真夜中ひとり午前三時…")
+
+
+
 @tasks.loop(minutes=30)
 async def lonely_check_lili():
     now = datetime.now(JST)
