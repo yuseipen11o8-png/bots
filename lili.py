@@ -139,6 +139,8 @@ async def on_ready():
     print(f"Lili online: {bot_lili.user}")
     if not bell_lili.is_running():
         bell_lili.start()
+    if not yoma_lili.is_running():
+        yoma_lili.start()
     if not lonely_check_lili.is_running():
         lonely_check_lili.start()
 
