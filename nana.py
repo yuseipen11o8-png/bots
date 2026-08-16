@@ -134,6 +134,8 @@ async def on_ready():
     print(f"Nana online: {bot_nana.user}")
     if not bell_nana.is_running():
         bell_nana.start()
+    if not yoma_nana.is_running():
+        yoma_nana.start()
 
 
 @bot_nana.event
