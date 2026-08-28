@@ -5,13 +5,26 @@ import discord
 from datetime import time, datetime
 
 from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, is_in_target_area
+from voice import register_voice_commands
 
 # ===================================================================================================================================================================
 # マカロン (Makaron) の構成
 # ===================================================================================================================================================================
 intents_maka = discord.Intents.default()
 intents_maka.message_content = True
-bot_maka = commands.Bot(command_prefix="マカロン", intents=intents_maka)
+
+
+class MakaronBot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix="マカロン", intents=intents_maka)
+
+    async def setup_hook(self):
+        # ボイスチャンネル関連コマンド (/join, /leave, /play, /soundlist) を登録
+        register_voice_commands(self, "makaron", "マカロン", BLACKLIST, is_in_target_area)
+        await self.tree.sync()
+
+
+bot_maka = MakaronBot()
 
 ANNIVERSARIES = {
     (6, 29): "再会のリリース日",
