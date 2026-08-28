@@ -42,13 +42,13 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
     @bot.tree.command(name="join", description=f"{display_name}をボイスチャンネルに呼ぶ")
     async def join(interaction: discord.Interaction):
         if interaction.user.id in blacklist:
-            await interaction.response.send_message("……。", ephemeral=True)
+            await interaction.response.send_message("………", ephemeral=True)
             return
         if not is_in_target_area(interaction.channel):
-            await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+            await interaction.response.send_message("ピピーー！(ここではお話しできないよ)", ephemeral=True)
             return
         if not isinstance(interaction.user, discord.Member) or interaction.user.voice is None:
-            await interaction.response.send_message("先にボイスチャンネルに入ってね！", ephemeral=True)
+            await interaction.response.send_message("ビーッ！(先にボイスチャンネルに入ってね！)", ephemeral=True)
             return
 
         channel = interaction.user.voice.channel
@@ -58,13 +58,13 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
             if vc is None:
                 await channel.connect()
             elif vc.channel.id == channel.id:
-                await interaction.response.send_message("もう一緒にいるよ！", ephemeral=True)
+                await interaction.response.send_message("ピコピコ(もう一緒にいるよ！)", ephemeral=True)
                 return
             else:
                 await vc.move_to(channel)
-            await interaction.response.send_message(f"{channel.name} に来たよ～！")
+            await interaction.response.send_message(f"ピコﾝ！({channel.name} に来たよ～！)")
         except Exception as e:
-            await interaction.response.send_message(f"入れなかった…({e})", ephemeral=True)
+            await interaction.response.send_message(f"ピコﾋﾟー（入れなかった…({e})）", ephemeral=True)
 
     @bot.tree.command(name="leave", description=f"{display_name}をボイスチャンネルから退出させる")
     async def leave(interaction: discord.Interaction):
@@ -74,20 +74,20 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
 
         vc = interaction.guild.voice_client if interaction.guild else None
         if vc is None:
-            await interaction.response.send_message("どこにもいないよ？", ephemeral=True)
+            await interaction.response.send_message("ピピピ…(どこにもいないよ？)", ephemeral=True)
             return
 
         await vc.disconnect(force=True)
-        await interaction.response.send_message("ばいばーい！")
+        await interaction.response.send_message("ピーー！(ばいばーい！)")
 
     @bot.tree.command(name="play", description=f"{display_name}に音声ファイルを再生させる")
     @app_commands.describe(name="再生したい音声ファイル名(拡張子なし)")
     async def play(interaction: discord.Interaction, name: str):
         if interaction.user.id in blacklist:
-            await interaction.response.send_message("……。", ephemeral=True)
+            await interaction.response.send_message("………", ephemeral=True)
             return
         if not is_in_target_area(interaction.channel):
-            await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+            await interaction.response.send_message("ピピーー！(ここではお話しできないよ)", ephemeral=True)
             return
 
         vc = interaction.guild.voice_client if interaction.guild else None
@@ -96,13 +96,13 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
             if isinstance(interaction.user, discord.Member) and interaction.user.voice:
                 vc = await interaction.user.voice.channel.connect()
             else:
-                await interaction.response.send_message("先にボイスチャンネルに入ってね！", ephemeral=True)
+                await interaction.response.send_message("ピッピッ(先にボイスチャンネルに入ってね！)", ephemeral=True)
                 return
 
         path = find_sound_path(bot_name, name)
         if path is None:
             available = list_sounds(bot_name)
-            hint = "、".join(available) if available else "（まだ音声ファイルがないよ）"
+            hint = "、".join(available) if available else "ピピ（まだ音声ファイルがないよ）"
             await interaction.response.send_message(
                 f"その音声はないよ…！使える音声：{hint}", ephemeral=True
             )
@@ -114,11 +114,11 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
         try:
             source = discord.FFmpegPCMAudio(path)
         except Exception as e:
-            await interaction.response.send_message(f"再生できなかった…({e})", ephemeral=True)
+            await interaction.response.send_message(f"ピコピコ…(再生できなかった…({e}))", ephemeral=True)
             return
 
         vc.play(source)
-        await interaction.response.send_message(f"🎵 {name} を再生するよ！")
+        await interaction.response.send_message(f"🎵 ﾋﾟー！({name} を再生するよ！)")
 
     @play.autocomplete("name")
     async def play_autocomplete(interaction: discord.Interaction, current: str):
@@ -136,8 +136,8 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
 
         sounds = list_sounds(bot_name)
         if not sounds:
-            await interaction.response.send_message("まだ音声ファイルが置かれてないよ！", ephemeral=True)
+            await interaction.response.send_message("ビーー(まだ音声ファイルが置かれてないよ！)", ephemeral=True)
             return
 
         text = "\n".join(f"・{s}" for s in sounds)
-        await interaction.response.send_message(f"再生できる音声一覧だよ！\n{text}", ephemeral=True)
+        await interaction.response.send_message(f"ピコﾋﾟ(再生できる音声一覧だよ！\n{text})", ephemeral=True)
