@@ -185,3 +185,17 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
 
         text = "\n".join(f"・{s}" for s in sounds)
         await interaction.response.send_message(f"ピコﾋﾟ(再生できる音声一覧だよ！\n{text})", ephemeral=True)
+    @bot.tree.error
+    async def on_voice_command_error(interaction: discord.Interaction, error: Exception):
+        # ここに来ると必ずログに出るので、何が起きたか追いやすくなる
+        print(f"[{display_name} slash command error] {type(error).__name__}: {error}")
+        import traceback
+        traceback.print_exception(type(error), error, error.__traceback__)
+ 
+        try:
+            if interaction.response.is_done():
+                await interaction.followup.send("エラーが起きたみたい…！ごめんね。", ephemeral=True)
+            else:
+                await interaction.response.send_message("エラーが起きたみたい…！ごめんね。", ephemeral=True)
+        except Exception:
+            pass
