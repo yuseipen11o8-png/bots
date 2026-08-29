@@ -115,10 +115,13 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
             vc.stop()
 
         try:
-            source = discord.FFmpegPCMAudio(path)
+            volume = _volumes.get((bot_name, interaction.guild.id), 1.0)
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(path), volume=volume)
         except Exception as e:
             await interaction.response.send_message(f"ピコピコ…(再生できなかった…({e}))", ephemeral=True)
             return
+
+        print(f"[{display_name}] /play: name={name}, volume_applied={volume}, source_type={type(source).__name__}")
 
         vc.play(source)
         await interaction.response.send_message(f"🎵 ﾋﾟー！({name} を再生するよ！)")
