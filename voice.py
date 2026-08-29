@@ -163,17 +163,25 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
  
         if percent is None:
             current = int(_volumes.get(key, 1.0) * 100)
-            await interaction.response.send_message(f"ピピピ(今の音量は {current}% だよ！)", ephemeral=True)
+            await interaction.response.send_message(f"今の音量は {current}% だよ！", ephemeral=True)
             return
  
         volume_value = percent / 100
         _volumes[key] = volume_value
  
         vc = interaction.guild.voice_client if interaction.guild else None
+        applied_live = False
         if vc is not None and isinstance(vc.source, discord.PCMVolumeTransformer):
             vc.source.volume = volume_value
+            applied_live = True
  
-        await interaction.response.send_message(f"🔊 ピコン(音量を {percent}% にしたよ！)")
+        print(f"[{display_name}] /volume: vc={vc is not None}, source_type={type(vc.source).__name__ if vc and vc.source else None}, is_playing={vc.is_playing() if vc else None}, applied_live={applied_live}")
+ 
+        if applied_live:
+            await interaction.response.send_message(f"🔊 音量を {percent}% にしたよ！(今の曲にも反映したよ)")
+        else:
+            await interaction.response.send_message(f"🔊 音量を {percent}% に設定したよ！(次に再生する曲から反映されるよ)")
+
 
     @bot.tree.command(name="soundlist", description=f"{display_name}が再生できる音声の一覧を表示する")
     async def soundlist(interaction: discord.Interaction):
