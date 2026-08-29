@@ -5,6 +5,9 @@ from discord import app_commands
 # 音声ファイルを置くルートディレクトリ
 SOUNDS_ROOT = "sounds"
 
+# ギルドごとの音量設定 (bot_name, guild_id) -> 0.0〜2.0 (100% = 1.0)
+_volumes: dict[tuple[str, int], float] = {}
+
 
 def get_sound_dir(bot_name: str) -> str:
     """bot_name (lili / nana / makaron) ごとの音声フォルダのパスを返す"""
