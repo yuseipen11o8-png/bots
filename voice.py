@@ -128,10 +128,54 @@ def register_voice_commands(bot, bot_name: str, display_name: str, blacklist, is
             if current.lower() in s.lower()
         ][:25]
 
+    @bot.tree.command(name="stop", description=f"{display_name}が再生中の音声を止める")
+    async def stop(interaction: discord.Interaction):
+        if interaction.user.id in blacklist:
+            await interaction.response.send_message("……。", ephemeral=True)
+            return
+ 
+        vc = interaction.guild.voice_client if interaction.guild else None
+        if vc is None or not vc.is_connected():
+            await interaction.response.send_message("どこにもいないよ？", ephemeral=True)
+            return
+ 
+        if not vc.is_playing() and not vc.is_paused():
+            await interaction.response.send_message("今は何も再生してないよ！", ephemeral=True)
+            return
+ 
+        vc.stop()
+        await interaction.response.send_message("ﾋﾟ！(止めたよ！)")
+ 
+    @bot.tree.command(name="volume", description=f"{display_name}の再生音量を変更する")
+    @app_commands.describe(percent="音量(%)。0〜200の数字で指定(未指定なら現在の音量を表示)")
+    async def volume(interaction: discord.Interaction, percent: app_commands.Range[int, 0, 200] = None):
+        if interaction.user.id in blacklist:
+            await interaction.response.send_message("……。", ephemeral=True)
+            return
+        if not is_in_target_area(interaction.channel):
+            await interaction.response.send_message("ここではお話しできないよ。", ephemeral=True)
+            return
+ 
+        key = (bot_name, interaction.guild.id)
+ 
+        if percent is None:
+            current = int(_volumes.get(key, 1.0) * 100)
+            await interaction.response.send_message(f"ピピピ(今の音量は {current}% だよ！)", ephemeral=True)
+            return
+ 
+        volume_value = percent / 100
+        _volumes[key] = volume_value
+ 
+        vc = interaction.guild.voice_client if interaction.guild else None
+        if vc is not None and isinstance(vc.source, discord.PCMVolumeTransformer):
+            vc.source.volume = volume_value
+ 
+        await interaction.response.send_message(f"🔊 ピコン(音量を {percent}% にしたよ！)")
+
     @bot.tree.command(name="soundlist", description=f"{display_name}が再生できる音声の一覧を表示する")
     async def soundlist(interaction: discord.Interaction):
         if interaction.user.id in blacklist:
-            await interaction.response.send_message("……。", ephemeral=True)
+            await interaction.response.send_message("………", ephemeral=True)
             return
 
         sounds = list_sounds(bot_name)
