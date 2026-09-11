@@ -127,7 +127,7 @@ async def lonely_check_lili():
     now = datetime.now(JST)
     for cid in TARGET_CHANNELS:
         last_at = bot_lili.last_human_msg_times.get(cid)
-        if last_at and now - last_at > timedelta(hours=24):
+        if last_at and now - last_at > timedelta(hours=168):
             ch = bot_lili.get_channel(cid)
             if ch:
                 await ch.send("…")
