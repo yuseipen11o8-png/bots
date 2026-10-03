@@ -4,7 +4,16 @@ from discord.ext import tasks, commands
 import discord
 from datetime import time, datetime
 
-from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, is_in_target_area
+from config import (
+    JST,
+    TARGET_CHANNELS,
+    BLACKLIST,
+    IGNORE_WORDS,
+    LILI_USER_ID,
+    NANA_USER_ID,
+    is_in_target_area,
+)
+from lines import MAKARON_TO_BOT, MAKARON_TO_HUMAN
 from voice import register_voice_commands
 
 # ===================================================================================================================================================================
@@ -247,6 +256,29 @@ async def on_ready():
         check_anniversary_maka.start()
 
 
+# ===================================================================================================================================================================
+# メッセージへの反応 (対ボット / 対人間)
+# ===================================================================================================================================================================
+async def handle_bot(message):
+    """Botからのメッセージへの反応"""
+    # リリ・ナナ以外のBotには反応しない
+    if message.author.id not in (LILI_USER_ID, NANA_USER_ID):
+        return
+
+    for k, v in MAKARON_TO_BOT.items():
+        if k in message.content:
+            await message.reply(v)
+            return
+
+
+async def handle_human(message):
+    """人間からのメッセージへの反応"""
+    for k, v in MAKARON_TO_HUMAN.items():
+        if k in message.content:
+            await message.reply(v)
+            return
+
+
 @bot_maka.event
 async def on_message(message):
     if message.author.id == bot_maka.user.id or message.author.id in BLACKLIST:
@@ -254,6 +286,13 @@ async def on_message(message):
     if any(word in message.content for word in IGNORE_WORDS):
         return
     await bot_maka.process_commands(message)
+    if not is_in_target_area(message.channel):
+        return
+
+    if message.author.bot:
+        await handle_bot(message)
+    else:
+        await handle_human(message)
 
 
 @bot_maka.command()
