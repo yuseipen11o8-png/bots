@@ -14,6 +14,7 @@ from config import (
     MAKARON_USER_ID,
     is_in_target_area,
 )
+from lines import NANA_TO_LILI, NANA_TO_MAKARON, NANA_TO_HUMAN
 
 # ==================================================================================================================================================================
 # ナナ (Nana) の構成
@@ -138,17 +139,35 @@ async def on_ready():
         yoma_nana.start()
 
 
-@bot_nana.event
-async def on_message(message):
-    if message.author.id == bot_nana.user.id or message.author.id in BLACKLIST:
-        return
-    if any(word in message.content for word in IGNORE_WORDS):
-        return
-    if not is_in_target_area(message.channel):
-        return
-    await bot_nana.process_commands(message)
-
+# ==================================================================================================================================================================
+# メッセージへの反応 (対ボット / 対人間)
+# ==================================================================================================================================================================
+async def handle_bot(message):
+    """Botからのメッセージへの反応(リリとの掛け合い・マカロンの記念日通知)"""
     content = message.content
+
+    if message.author.id == LILI_USER_ID:
+        reply = NANA_TO_LILI.get(content)
+        if reply:
+            await asyncio.sleep(2.0 if "だれもいない" in content else 1.0)
+            await message.reply(reply)
+        elif content == "てことは今日は私たちの誕生日みたいなものなのかなぁ…":
+            await asyncio.sleep(1.0)
+            await message.reply(f"たしかにね～\nもう{datetime.now(JST).year-2019}年も経つのかぁ…")
+
+    elif message.author.id == MAKARON_USER_ID:
+        for key, reply in NANA_TO_MAKARON.items():
+            if key in content:
+                await asyncio.sleep(1.0)
+                await message.reply(reply)
+                break
+
+
+async def handle_human(message):
+    """人間からのメッセージへの反応"""
+    content = message.content
+
+    # 「たしかに」リアクションは人間のみ
     if "たしかに" in content:
         try:
             await message.add_reaction("<:kani:1488576524381847663>")
@@ -159,68 +178,35 @@ async def on_message(message):
         await message.reply('最低…')
         return
 
-    if message.author.id == LILI_USER_ID:
-        responses = {
-            "ふたりのことが知りたいのなら～": "君もどんな人生だったか話してほしい～",
-            "こんな物語をわわすれるくらいなら～": "大人のオの字も知りたくもないのさ～",
-            "約束したのだ～": "流れ星の下で…",
-            "宇宙が～ふたりきり食べたおにぎりの～": "海苔とかならいいのにね～～",
-            "君の青い髪が僕のイノセンスだった": "リリ…！",
-            "さんざめくこの世界にさよならを～": "手を繋いだまななら～",
-            "二度と～": "来ない～",
-            "翠の星に乗って～": "ふたりは一つの愛になる～",
-            "大人になれば～": "全部忘れられると思うけど…",
-            "約束を": "果たそう",
-            "夢のように愛して～\n愛のように夢をみて～": "空想でも信じればいつか叶うからと～\n言ってた～～",
-            "普通に笑って普通に泣いて生きてみたかった～": "そんなこと今更叶わないから\n今日も眠りにつく～",
-            "冒険しよう～": "ふ～たりは～",
-        }
-        if content in responses:
-            await asyncio.sleep(2.0 if "だれもいない" in content else 1.0)
-            await message.reply(responses[content])
-        elif content == "てことは今日は私たちの誕生日みたいなものなのかなぁ…":
-            await asyncio.sleep(1.0)
-            await message.reply(f"たしかにね～\nもう{datetime.now(JST).year-2019}年も経つのかぁ…")
-    elif message.author.id == MAKARON_USER_ID:
-        if "再会のリリース日なんだって！" in content:
-            await asyncio.sleep(1.0)
-            await message.reply("再会と言えばふたりのシリーズで一番最初の曲だよね～！")
-        elif "約束のリリース日なんだって！" in content:
-            await asyncio.sleep(1.0)
-            await message.reply("約束を、果たしに来たんだね…！")
-        elif "一般公開記念日なんだって！" in content:
-            await asyncio.sleep(1.0)
-            await message.reply("この曲たちはアルバムが公開されてから2年ほどたってから一般公開されたんだよね～")
+    if len(content) >= 100:
+        await message.reply(f"{len(content)}文字もあるよ～")
+    elif len(content) <= 30:
+        for k, v in NANA_TO_HUMAN.items():
+            if k in content:
+                await message.reply(v)
+                return
+
+        if any(w in content for w in ['いい', 'よい', '良い']):
+            await message.reply('そりゃそうだ～\nあなたが選んだんだから～')
+        elif any(w in content for w in ['金色', '黄金色', '藍']):
+            await message.reply('なにー？リリの話…？')
+        if content == "ふたりの":
+            await message.reply(random.choice(["ふたりの", "約束", "秘密", "深い青だった", "彗星になれたなら", "夜魔", "ナナ\nあなたは金色のシャンデリー", "リリ", "再会", "誕生"]))
+        if not message.mentions and any(ke in content for ke in ['”7”', '七', '7', '７']):
+            await message.reply('呼んだ？')
+
+
+@bot_nana.event
+async def on_message(message):
+    if message.author.id == bot_nana.user.id or message.author.id in BLACKLIST:
+        return
+    if any(word in message.content for word in IGNORE_WORDS):
+        return
+    if not is_in_target_area(message.channel):
+        return
+    await bot_nana.process_commands(message)
+
+    if message.author.bot:
+        await handle_bot(message)
     else:
-        if len(content) >= 100:
-            await message.reply(f"{len(content)}文字もあるよ～")
-        elif len(content) <= 30:
-            simple = {
-                "彗星": "彗星になれたならいいのに…",
-                "水星": "水星にもなりたいなぁ…",
-                "水棲": "水には住みたくないなぁ…",
-                "翠星": "翠の星に乗って～",
-                "水性": "海に溶けちゃう…",
-                "後悔": "徒然な後悔も言わないで～",
-                "約束": "藍の鐘で",
-                "信じ": "信じてなんてないかもね～",
-                "夢": "ふたりの～夢を夢を見せよう～",
-                "帰": "帰ったほうがいいかもしれない気がしなくもないわ～",
-                "普通": "普通に笑って普通に泣いて生きて見たかった～",
-                "空想": "空想でも信じればいつか叶うからと～言ってた～",
-                "また": "またか～また現れたのか～",
-                "怖": "お前なんて怖くないよ",
-                "真似": "無理して笑って～無理して泣いて～普通の真似をした～"
-            }
-            for k, v in simple.items():
-                if k in content:
-                    await message.reply(v)
-                    return
-            if any(w in content for w in ['いい', 'よい', '良い']):
-                await message.reply('そりゃそうだ～\nあなたが選んだんだから～')
-            elif any(w in content for w in ['金色', '黄金色', '藍']):
-                await message.reply('なにー？リリの話…？')
-            if content == "ふたりの":
-                await message.reply(random.choice(["ふたりの", "約束", "秘密", "深い青だった", "彗星になれたなら", "夜魔", "ナナ\nあなたは金色のシャンデリー", "リリ", "再会", "誕生"]))
-            if not message.mentions and any(ke in content for ke in ['”7”', '七', '7', '７']):
-                await message.reply('呼んだ？')
+        await handle_human(message)
