@@ -14,7 +14,17 @@ from config import (
     MAKARON_USER_ID,
     is_in_target_area,
 )
-from lines import NANA_TO_LILI, NANA_TO_MAKARON, NANA_TO_HUMAN
+from lines import (
+    NANA_TO_LILI,
+    NANA_TO_MAKARON,
+    NANA_TO_HUMAN,
+    NANA_TO_HUMAN_MULTI,
+    NANA_FUTARINO_REPLIES,
+    NANA_CALL_WORDS,
+    NANA_CALL_REPLY,
+    NANA_LOLI_REPLY,
+    LOLI_NANA_WORDS,
+)
 
 # ==================================================================================================================================================================
 # ナナ (Nana) の構成
@@ -174,26 +184,37 @@ async def handle_human(message):
         except Exception:
             pass
 
-    if any(ki in content for ki in ['ロリなな', 'ろりなな', 'ななロリ', 'ななろり', 'ナナロリ', 'ナナろり', 'おねリリ', 'おねりり']):
-        await message.reply('最低…')
+    # 「ロリなな」系(文字数に関係なく反応)
+    if any(ki in content for ki in LOLI_NANA_WORDS):
+        await message.reply(NANA_LOLI_REPLY)
         return
 
+    # 長文(100文字以上)
     if len(content) >= 100:
         await message.reply(f"{len(content)}文字もあるよ～")
-    elif len(content) <= 30:
+        return
+
+    # 短文(30文字以下)のみ、キーワードに反応
+    if len(content) <= 30:
+        # 1キーワード → 1返事
         for k, v in NANA_TO_HUMAN.items():
             if k in content:
                 await message.reply(v)
                 return
 
-        if any(w in content for w in ['いい', 'よい', '良い']):
-            await message.reply('そりゃそうだ～\nあなたが選んだんだから～')
-        elif any(w in content for w in ['金色', '黄金色', '藍']):
-            await message.reply('なにー？リリの話…？')
+        # 複数キーワード → 1返事(最初に一致したものだけ。返事のあとも下の判定は続く)
+        for words, reply in NANA_TO_HUMAN_MULTI:
+            if any(w in content for w in words):
+                await message.reply(reply)
+                break
+
+        # 「ふたりの」だけ言われたらランダムで返す
         if content == "ふたりの":
-            await message.reply(random.choice(["ふたりの", "約束", "秘密", "深い青だった", "彗星になれたなら", "夜魔", "ナナ\nあなたは金色のシャンデリー", "リリ", "再会", "誕生"]))
-        if not message.mentions and any(ke in content for ke in ['”7”', '七', '7', '７']):
-            await message.reply('呼んだ？')
+            await message.reply(random.choice(NANA_FUTARINO_REPLIES))
+
+        # 「7」系ワード(メンションなしの時のみ)
+        if not message.mentions and any(ke in content for ke in NANA_CALL_WORDS):
+            await message.reply(NANA_CALL_REPLY)
 
 
 @bot_nana.event
