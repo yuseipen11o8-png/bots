@@ -5,7 +5,13 @@ from discord import app_commands
 from datetime import time, timedelta, datetime
 
 from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, NANA_USER_ID, is_in_target_area
-from lines import LILI_TO_BOT, LILI_TO_HUMAN
+from lines import (
+    LILI_TO_BOT,
+    LILI_TO_HUMAN,
+    LILI_TO_HUMAN_MULTI,
+    LILI_LOLI_REPLY,
+    LOLI_NANA_WORDS,
+)
 
 # ==================================================================================================================================================
 # リリ (Lili) の構成
@@ -167,20 +173,29 @@ async def handle_human(message):
     content = message.content
     bot_lili.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
+    # 長文(100文字以上)
     if len(content) >= 100:
         await message.reply("長すぎるよ～")
-    elif any(ki in content for ki in ['ロリなな', 'ろりなな', 'ななロリ', 'ななろり', 'ナナロリ', 'ナナろり', 'おねリリ', 'おねりり']):
-        await message.reply('イノセンスなさそう')
-    elif len(content) <= 30:
+        return
+
+    # 「ロリなな」系(文字数に関係なく反応)
+    if any(ki in content for ki in LOLI_NANA_WORDS):
+        await message.reply(LILI_LOLI_REPLY)
+        return
+
+    # 短文(30文字以下)のみ、キーワードに反応
+    if len(content) <= 30:
+        # 1キーワード → 1返事
         for k, v in LILI_TO_HUMAN.items():
             if k in content:
                 await message.reply(v)
                 return
 
-        if any(w in content for w in ['藍', '青色', '青い髪', '桃色']):
-            await message.reply('？ナナの話…？')
-        elif any(w in content for w in ['好き', 'スキ', 'ｽｷ', 'すき']):
-            await message.reply('大好きだった～狂いそうなほど～')
+        # 複数キーワード → 1返事(最初に一致したものだけ)
+        for words, reply in LILI_TO_HUMAN_MULTI:
+            if any(w in content for w in words):
+                await message.reply(reply)
+                return
 
 
 @bot_lili.event
