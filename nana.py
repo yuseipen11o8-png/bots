@@ -3,7 +3,7 @@ import random
 import discord
 from discord.ext import tasks, commands
 from discord import app_commands
-from datetime import time, datetime
+from datetime import time, datetime, timedelta
 
 from config import (
     JST,
@@ -36,6 +36,7 @@ intents_nana.message_content = True
 class NanaBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="ナナ", intents=intents_nana)
+        self.last_human_msg_times = {}
 
     async def setup_hook(self):
         NANA_COMMANDS = {
@@ -140,6 +141,18 @@ async def yoma_nana():
             await ch.send("届かぬ手紙を書いている…")
 
 
+@tasks.loop(minutes=30)
+async def lonely_check_nana():
+    now = datetime.now(JST)
+    for cid in TARGET_CHANNELS:
+        last_at = bot_nana.last_human_msg_times.get(cid)
+        if last_at and now - last_at > timedelta(hours=24):
+            ch = bot_nana.get_channel(cid)
+            if ch:
+                await ch.send("…")
+                bot_nana.last_human_msg_times[cid] = now
+
+
 @bot_nana.event
 async def on_ready():
     print(f"Nana online: {bot_nana.user}")
@@ -147,6 +160,8 @@ async def on_ready():
         bell_nana.start()
     if not yoma_nana.is_running():
         yoma_nana.start()
+    if not lonely_check_nana.is_running():
+        lonely_check_nana.start()
 
 
 # ==================================================================================================================================================================
@@ -176,6 +191,7 @@ async def handle_bot(message):
 async def handle_human(message):
     """人間からのメッセージへの反応"""
     content = message.content
+    bot_nana.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
     # 「たしかに」リアクションは人間のみ
     if "たしかに" in content:
