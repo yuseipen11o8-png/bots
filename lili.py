@@ -2,7 +2,7 @@ import asyncio
 import discord
 from discord.ext import tasks, commands
 from discord import app_commands
-from datetime import time, timedelta, datetime
+from datetime import time
 
 from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, NANA_USER_ID, is_in_target_area
 from lines import (
@@ -23,7 +23,6 @@ intents_lili.message_content = True
 class LiliBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="リリ", intents=intents_lili)
-        self.last_human_msg_times = {}
 
     async def setup_hook(self):
         LILI_COMMANDS = {
@@ -128,19 +127,6 @@ async def yoma_lili():
             await ch.send("真夜中ひとり午前三時…")
 
 
-
-@tasks.loop(minutes=30)
-async def lonely_check_lili():
-    now = datetime.now(JST)
-    for cid in TARGET_CHANNELS:
-        last_at = bot_lili.last_human_msg_times.get(cid)
-        if last_at and now - last_at > timedelta(hours=24):
-            ch = bot_lili.get_channel(cid)
-            if ch:
-                await ch.send("…")
-                bot_lili.last_human_msg_times[cid] = now
-
-
 @bot_lili.event
 async def on_ready():
     print(f"Lili online: {bot_lili.user}")
@@ -148,8 +134,6 @@ async def on_ready():
         bell_lili.start()
     if not yoma_lili.is_running():
         yoma_lili.start()
-    if not lonely_check_lili.is_running():
-        lonely_check_lili.start()
 
 
 # ==================================================================================================================================================
@@ -171,7 +155,6 @@ async def handle_bot(message):
 async def handle_human(message):
     """人間からのメッセージへの反応"""
     content = message.content
-    bot_lili.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
     # 長文(100文字以上)
     if len(content) >= 100:
