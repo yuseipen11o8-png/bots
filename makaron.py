@@ -15,6 +15,11 @@ from config import (
 )
 from lines import MAKARON_TO_BOT, MAKARON_TO_HUMAN
 from voice import register_voice_commands
+from roles import ensure_bot_role
+
+# Bot専用ロールの設定
+MAKARON_ROLE_NAME = "マカロン"
+MAKARON_ROLE_COLOUR = discord.Colour(0x02ECA6)
 
 # ===================================================================================================================================================================
 # マカロン (Makaron) の構成
@@ -252,8 +257,17 @@ async def check_anniversary_maka():
 @bot_maka.event
 async def on_ready():
     print(f"Makaron online: {bot_maka.user}")
+    # 参加済みの全サーバーでBot専用ロールを作成・付与
+    for guild in bot_maka.guilds:
+        await ensure_bot_role(guild, MAKARON_ROLE_NAME, MAKARON_ROLE_COLOUR)
     if not check_anniversary_maka.is_running():
         check_anniversary_maka.start()
+
+
+@bot_maka.event
+async def on_guild_join(guild):
+    # 新しくサーバーに招待されたときにBot専用ロールを作成・付与
+    await ensure_bot_role(guild, MAKARON_ROLE_NAME, MAKARON_ROLE_COLOUR)
 
 
 # ===================================================================================================================================================================
