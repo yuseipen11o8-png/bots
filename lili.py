@@ -12,6 +12,11 @@ from lines import (
     LILI_LOLI_REPLY,
     LOLI_NANA_WORDS,
 )
+from roles import ensure_bot_role
+
+# Bot専用ロールの設定
+LILI_ROLE_NAME = "リリ"
+LILI_ROLE_COLOUR = discord.Colour(0xFFED11)
 
 # ==================================================================================================================================================
 # リリ (Lili) の構成
@@ -130,10 +135,19 @@ async def yoma_lili():
 @bot_lili.event
 async def on_ready():
     print(f"Lili online: {bot_lili.user}")
+    # 参加済みの全サーバーでBot専用ロールを作成・付与
+    for guild in bot_lili.guilds:
+        await ensure_bot_role(guild, LILI_ROLE_NAME, LILI_ROLE_COLOUR)
     if not bell_lili.is_running():
         bell_lili.start()
     if not yoma_lili.is_running():
         yoma_lili.start()
+
+
+@bot_lili.event
+async def on_guild_join(guild):
+    # 新しくサーバーに招待されたときにBot専用ロールを作成・付与
+    await ensure_bot_role(guild, LILI_ROLE_NAME, LILI_ROLE_COLOUR)
 
 
 # ==================================================================================================================================================
