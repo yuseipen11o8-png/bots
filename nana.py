@@ -25,6 +25,11 @@ from lines import (
     NANA_LOLI_REPLY,
     LOLI_NANA_WORDS,
 )
+from roles import ensure_bot_role
+
+# Bot専用ロールの設定
+NANA_ROLE_NAME = "ナナ"
+NANA_ROLE_COLOUR = discord.Colour(0x000F97)
 
 # ==================================================================================================================================================================
 # ナナ (Nana) の構成
@@ -149,19 +154,28 @@ async def lonely_check_nana():
         if last_at and now - last_at > timedelta(hours=24):
             ch = bot_nana.get_channel(cid)
             if ch:
-                await ch.send("…")
+                await ch.send("これほどの時間が経って世界はずっと止まっている…")
                 bot_nana.last_human_msg_times[cid] = now
 
 
 @bot_nana.event
 async def on_ready():
     print(f"Nana online: {bot_nana.user}")
+    # 参加済みの全サーバーでBot専用ロールを作成・付与
+    for guild in bot_nana.guilds:
+        await ensure_bot_role(guild, NANA_ROLE_NAME, NANA_ROLE_COLOUR)
     if not bell_nana.is_running():
         bell_nana.start()
     if not yoma_nana.is_running():
         yoma_nana.start()
     if not lonely_check_nana.is_running():
         lonely_check_nana.start()
+
+
+@bot_nana.event
+async def on_guild_join(guild):
+    # 新しくサーバーに招待されたときにBot専用ロールを作成・付与
+    await ensure_bot_role(guild, NANA_ROLE_NAME, NANA_ROLE_COLOUR)
 
 
 # ==================================================================================================================================================================
