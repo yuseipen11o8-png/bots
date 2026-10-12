@@ -16,7 +16,7 @@ from roles import ensure_bot_role
 
 # Bot専用ロールの設定
 LILI_ROLE_NAME = "リリ"
-LILI_ROLE_COLOUR = discord.Colour(0xFEDC3D)
+LILI_ROLE_COLOUR = discord.Colour(0xFFBE00)
 
 # ==================================================================================================================================================
 # リリ (Lili) の構成
