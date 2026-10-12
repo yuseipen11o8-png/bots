@@ -29,7 +29,7 @@ from roles import ensure_bot_role
 
 # Bot専用ロールの設定
 NANA_ROLE_NAME = "ナナ"
-NANA_ROLE_COLOUR = discord.Colour(0x000F97)
+NANA_ROLE_COLOUR = discord.Colour(0x2066B3)
 
 # ==================================================================================================================================================================
 # ナナ (Nana) の構成
