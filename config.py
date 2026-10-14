@@ -1,3 +1,4 @@
+import discord
 from datetime import timezone, timedelta
 
 # タイムゾーン
@@ -41,3 +42,17 @@ def is_in_target_area(channel):
         return True
 
     return False
+
+
+def is_dm(channel) -> bool:
+    """DMチャンネルかどうか(キャッシュされていないDMも含めて判定)"""
+    if channel is None:
+        return False
+    if isinstance(channel, discord.DMChannel):
+        return True
+    return getattr(channel, "type", None) == discord.ChannelType.private
+
+
+def can_use_slash(channel) -> bool:
+    """スラッシュコマンドを使ってよい場所(対象エリア or DM)"""
+    return is_dm(channel) or is_in_target_area(channel)
