@@ -13,6 +13,7 @@ from config import (
     LILI_USER_ID,
     MAKARON_USER_ID,
     is_in_target_area,
+    can_use_slash,
 )
 from lines import (
     NANA_TO_LILI,
@@ -24,6 +25,8 @@ from lines import (
     NANA_CALL_REPLY,
     NANA_LOLI_REPLY,
     LOLI_NANA_WORDS,
+    NANA_DM_TO_HUMAN,
+    NANA_DM_DEFAULT,
 )
 from roles import ensure_bot_role
 
@@ -105,7 +108,8 @@ class NanaBot(commands.Bot):
                         await interaction.response.send_message("……。", ephemeral=True)
                         return
 
-                    if is_in_target_area(interaction.channel):
+                    # 対象エリア または DM なら返事をする
+                    if can_use_slash(interaction.channel):
                         await interaction.response.send_message(resp)
                     else:
                         await interaction.response.send_message(
@@ -179,7 +183,7 @@ async def on_guild_join(guild):
 
 
 # ==================================================================================================================================================================
-# メッセージへの反応 (対ボット / 対人間)
+# メッセージへの反応 (対ボット / 対人間 / DM)
 # ==================================================================================================================================================================
 async def handle_bot(message):
     """Botからのメッセージへの反応(リリとの掛け合い・マカロンの記念日通知)"""
@@ -247,10 +251,28 @@ async def handle_human(message):
             await message.reply(NANA_CALL_REPLY)
 
 
+async def handle_dm(message):
+    """DM専用の会話(セリフは lines.py の NANA_DM_* に書く)"""
+    content = message.content
+    for k, v in NANA_DM_TO_HUMAN.items():
+        if k in content:
+            await message.channel.send(v)
+            return
+    if NANA_DM_DEFAULT:
+        await message.channel.send(random.choice(NANA_DM_DEFAULT))
+
+
 @bot_nana.event
 async def on_message(message):
     if message.author.id == bot_nana.user.id or message.author.id in BLACKLIST:
         return
+
+    # DMは専用処理だけ行って終了(通常の返事・プレフィックスコマンドは動かさない)
+    if message.guild is None:
+        if not message.author.bot:
+            await handle_dm(message)
+        return
+
     if any(word in message.content for word in IGNORE_WORDS):
         return
     if not is_in_target_area(message.channel):
