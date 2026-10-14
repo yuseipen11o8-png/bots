@@ -12,8 +12,9 @@ from config import (
     LILI_USER_ID,
     NANA_USER_ID,
     is_in_target_area,
+    can_use_slash,
 )
-from lines import MAKARON_TO_BOT, MAKARON_TO_HUMAN
+from lines import MAKARON_TO_BOT, MAKARON_TO_HUMAN, MAKARON_DM_TO_HUMAN, MAKARON_DM_DEFAULT
 from voice import register_voice_commands
 from roles import ensure_bot_role
 
@@ -33,8 +34,9 @@ class MakaronBot(commands.Bot):
         super().__init__(command_prefix="マカロン", intents=intents_maka)
 
     async def setup_hook(self):
-        # ボイスチャンネル関連コマンド (/join, /leave, /play, /soundlist) を登録
-        register_voice_commands(self, "makaron", "マカロン", BLACKLIST, is_in_target_area)
+        # ボイスチャンネル関連コマンド (/join, /leave, /play, /stop, /volume, /soundlist) を登録
+        # 対象エリア または DM で使える判定(can_use_slash)を渡す
+        register_voice_commands(self, "makaron", "マカロン", BLACKLIST, can_use_slash)
         await self.tree.sync()
 
 
@@ -271,7 +273,7 @@ async def on_guild_join(guild):
 
 
 # ===================================================================================================================================================================
-# メッセージへの反応 (対ボット / 対人間)
+# メッセージへの反応 (対ボット / 対人間 / DM)
 # ===================================================================================================================================================================
 async def handle_bot(message):
     """Botからのメッセージへの反応"""
@@ -293,10 +295,28 @@ async def handle_human(message):
             return
 
 
+async def handle_dm(message):
+    """DM専用の会話(セリフは lines.py の MAKARON_DM_* に書く)"""
+    content = message.content
+    for k, v in MAKARON_DM_TO_HUMAN.items():
+        if k in content:
+            await message.channel.send(v)
+            return
+    if MAKARON_DM_DEFAULT:
+        await message.channel.send(random.choice(MAKARON_DM_DEFAULT))
+
+
 @bot_maka.event
 async def on_message(message):
     if message.author.id == bot_maka.user.id or message.author.id in BLACKLIST:
         return
+
+    # DMは専用処理だけ行って終了(通常の返事・プレフィックスコマンドは動かさない)
+    if message.guild is None:
+        if not message.author.bot:
+            await handle_dm(message)
+        return
+
     if any(word in message.content for word in IGNORE_WORDS):
         return
     await bot_maka.process_commands(message)
