@@ -1,16 +1,27 @@
 import asyncio
+import random
 import discord
 from discord.ext import tasks, commands
 from discord import app_commands
 from datetime import time
 
-from config import JST, TARGET_CHANNELS, BLACKLIST, IGNORE_WORDS, NANA_USER_ID, is_in_target_area
+from config import (
+    JST,
+    TARGET_CHANNELS,
+    BLACKLIST,
+    IGNORE_WORDS,
+    NANA_USER_ID,
+    is_in_target_area,
+    can_use_slash,
+)
 from lines import (
     LILI_TO_BOT,
     LILI_TO_HUMAN,
     LILI_TO_HUMAN_MULTI,
     LILI_LOLI_REPLY,
     LOLI_NANA_WORDS,
+    LILI_DM_TO_HUMAN,
+    LILI_DM_DEFAULT,
 )
 from roles import ensure_bot_role
 
@@ -92,7 +103,8 @@ class LiliBot(commands.Bot):
                         await interaction.response.send_message("……。", ephemeral=True)
                         return
 
-                    if is_in_target_area(interaction.channel):
+                    # 対象エリア または DM なら返事をする
+                    if can_use_slash(interaction.channel):
                         await interaction.response.send_message(resp)
                     else:
                         await interaction.response.send_message(
@@ -151,7 +163,7 @@ async def on_guild_join(guild):
 
 
 # ==================================================================================================================================================
-# メッセージへの反応 (対ボット / 対人間)
+# メッセージへの反応 (対ボット / 対人間 / DM)
 # ==================================================================================================================================================
 async def handle_bot(message):
     """Botからのメッセージへの反応(ナナとの掛け合い)"""
@@ -195,10 +207,28 @@ async def handle_human(message):
                 return
 
 
+async def handle_dm(message):
+    """DM専用の会話(セリフは lines.py の LILI_DM_* に書く)"""
+    content = message.content
+    for k, v in LILI_DM_TO_HUMAN.items():
+        if k in content:
+            await message.channel.send(v)
+            return
+    if LILI_DM_DEFAULT:
+        await message.channel.send(random.choice(LILI_DM_DEFAULT))
+
+
 @bot_lili.event
 async def on_message(message):
     if message.author.id == bot_lili.user.id or message.author.id in BLACKLIST:
         return
+
+    # DMは専用処理だけ行って終了(通常の返事・プレフィックスコマンドは動かさない)
+    if message.guild is None:
+        if not message.author.bot:
+            await handle_dm(message)
+        return
+
     if any(word in message.content for word in IGNORE_WORDS):
         return
     await bot_lili.process_commands(message)
