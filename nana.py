@@ -105,7 +105,7 @@ async def lonely_check_nana():
     now = datetime.now(JST)
     for cid in TARGET_CHANNELS:
         last_at = bot_nana.last_human_msg_times.get(cid)
-        if last_at and now - last_at > timedelta(hours=24):
+        if last_at and now - last_at > timedelta(hours=168):
             ch = bot_nana.get_channel(cid)
             if ch:
                 await ch.send("これほどの時間が経って世界はずっと止まっている…")
