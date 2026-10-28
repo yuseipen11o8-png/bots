@@ -168,6 +168,12 @@ async def handle_human(message):
         except Exception:
             pass
 
+    if "確かに" in content:
+        try:
+            await message.add_reaction("<:kani:1488576524381847663>")
+        except Exception:
+            pass
+
     # 「ロリなな」系(文字数に関係なく反応)
     if any(ki in content for ki in LOLI_NANA_WORDS):
         await message.reply(NANA_LOLI_REPLY)
