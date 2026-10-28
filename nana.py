@@ -162,13 +162,7 @@ async def handle_human(message):
     bot_nana.last_human_msg_times[message.channel.id] = datetime.now(JST)
 
     # 「たしかに」リアクションは人間のみ
-    if "たしかに" in content:
-        try:
-            await message.add_reaction("<:kani:1488576524381847663>")
-        except Exception:
-            pass
-
-    if "確かに" in content:
+    if "かに" in content:
         try:
             await message.add_reaction("<:kani:1488576524381847663>")
         except Exception:
